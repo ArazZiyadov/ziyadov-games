@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Snake 3D Ultra | Ziyadov Games</title>
+    <title>Snake 3D Adventure | Ziyadov Games</title>
     <style>
         body { margin: 0; background: #000; overflow: hidden; font-family: 'Orbitron', sans-serif; }
         #ui { position: absolute; top: 20px; left: 20px; color: #fff; z-index: 10; pointer-events: none; }
-        #fps-counter { position: absolute; top: 20px; right: 80px; color: #00ff00; font-size: 14px; }
+        #fps-counter { position: absolute; top: 20px; right: 20px; color: #00ff00; font-size: 14px; z-index: 10; }
         
         #joystick-zone {
             position: absolute; bottom: 40px; left: 40px; width: 140px; height: 140px;
-            background: rgba(255,255,255,0.05); border: 2px solid rgba(0,242,254,0.2); border-radius: 50%;
+            background: rgba(255,255,255,0.05); border: 2px solid rgba(0,242,254,0.1); border-radius: 50%;
         }
         #stick {
             position: absolute; top: 50%; left: 50%; width: 50px; height: 50px;
@@ -26,7 +26,6 @@
 
     <div id="ui">
         <div class="stats">XAL: <span id="score">0</span></div>
-        <div style="font-size: 12px; color: #4facfe;">MƏRHƏLƏ: <span id="lvl">1</span></div>
     </div>
     <div id="fps-counter">FPS: 0</div>
 
@@ -35,115 +34,123 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        let scene, camera, renderer, player = [], enemies = [], food, env = [];
-        let score = 0, level = 1, moveDir = new THREE.Vector3(0.15, 0, 0);
-        let lastTime = 0, frameCount = 0, fps = 0;
+        let scene, camera, renderer, player = [], enemies = [], foods = [], env = [];
+        let score = 0, moveDir = new THREE.Vector3(0.18, 0, 0);
+        let lastTime = 0, frameCount = 0;
+        const worldSize = 400; // Çox böyük xəritə
 
         init();
         animate();
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xa3d1ff);
-            scene.fog = new THREE.Fog(0xa3d1ff, 20, 150);
+            scene.background = new THREE.Color(0xa3d1ff); // Mənzərəli Səma
+            scene.fog = new THREE.Fog(0xa3d1ff, 30, worldSize/2); // Duman mənzərəni gözəlləşdirir
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 120 FPS dəstəyi
             document.body.appendChild(renderer.domElement);
 
             // İşıqlandırma
             const sun = new THREE.DirectionalLight(0xffffff, 1.2);
             sun.position.set(50, 100, 50);
             scene.add(sun);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            scene.add(new THREE.AmbientLight(0xffffff, 0.7));
 
-            // Sonsuz dünya görünüşü üçün yaşıl zəmin
+            // Zəmin (Meşə otu teksturası)
             const ground = new THREE.Mesh(
-                new THREE.PlaneGeometry(1000, 1000),
-                new THREE.MeshPhongMaterial({ color: 0x3e8e41 })
+                new THREE.PlaneGeometry(worldSize, worldSize),
+                new THREE.MeshPhongMaterial({ color: 0x228b22 }) // Tünd yaşıl ot
             );
             ground.rotation.x = -Math.PI / 2;
             scene.add(ground);
 
-            // Meşə, Evlər və Qayalar
-            for(let i=0; i<150; i++) spawnDecoration();
+            // DAĞLAR VƏ MANZƏRƏ
+            createMountains();
 
-            // İlk İlan (Player)
+            // Çoxlu Ağaclar (800 ədəd)
+            for(let i=0; i<800; i++) spawnTree();
+
+            // İlan (Player)
             createSnake(0, 0, true);
 
-            // Nəhəng Rəqiblər
-            for(let i=0; i<5; i++) spawnMegaEnemy();
+            // Çoxlu Böyümək Hanaları (15 ədəd)
+            for(let i=0; i<15; i++) spawnFood();
 
-            spawnFood();
             initJoystick();
         }
 
-        function spawnDecoration() {
-            const x = Math.random() * 400 - 200;
-            const z = Math.random() * 400 - 200;
-            const type = Math.random();
-
-            if(type > 0.4) { // Ağac
-                const tree = new THREE.Group();
-                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2), new THREE.MeshPhongMaterial({color: 0x5d3a1a}));
-                const top = new THREE.Mesh(new THREE.ConeGeometry(1.5, 4, 8), new THREE.MeshPhongMaterial({color: 0x2d5a27}));
-                top.position.y = 2.5;
-                tree.add(trunk); tree.add(top);
-                tree.position.set(x, 1, z);
-                scene.add(tree);
-                env.push(tree);
-            } else if(type > 0.1) { // Qaya
-                const rock = new THREE.Mesh(
-                    new THREE.DodecahedronGeometry(Math.random()*2),
-                    new THREE.MeshPhongMaterial({color: 0x808080})
-                );
-                rock.position.set(x, 0.5, z);
-                scene.add(rock);
-                env.push(rock);
-            } else { // Ev
-                const house = new THREE.Group();
-                const base = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 4), new THREE.MeshPhongMaterial({color: 0xccaa88}));
-                const roof = new THREE.Mesh(new THREE.ConeGeometry(3.5, 2, 4), new THREE.MeshPhongMaterial({color: 0x882222}));
-                roof.position.y = 2.5; roof.rotation.y = Math.PI/4;
-                house.add(base); house.add(roof);
-                house.position.set(x, 1.5, z);
-                scene.add(house);
-                env.push(house);
+        function createMountains() {
+            // Xəritənin dörd tərəfinə dağlar
+            const mtMat = new THREE.MeshPhongMaterial({ color: 0x8b8b8b, emissive: 0x111111 });
+            for(let i=0; i<30; i++) {
+                const height = Math.random() * 40 + 10;
+                const mtGeo = new THREE.ConeGeometry(Math.random()*15+5, height, 4);
+                const mt = new THREE.Mesh(mtGeo, mtMat);
+                
+                // Mərkəzdən kənara yerləşdir
+                const angle = Math.random() * Math.PI * 2;
+                const dist = worldSize / 2 + Math.random() * 20;
+                mt.position.set(Math.cos(angle)*dist, height/2, Math.sin(angle)*dist);
+                mt.rotation.y = Math.random() * Math.PI;
+                scene.add(mt);
             }
+        }
+
+        function spawnTree() {
+            const tree = new THREE.Group();
+            const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, 2.5);
+            const trunkMat = new THREE.MeshPhongMaterial({color: 0x5d3a1a});
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+
+            const topGeo = new THREE.ConeGeometry(1.5, 4, 8);
+            const topMat = new THREE.MeshPhongMaterial({color: 0x1e4d2b});
+            const top = new THREE.Mesh(topGeo, topMat);
+            top.position.y = 2.5;
+
+            tree.add(trunk); tree.add(top);
+            
+            // Xəritənin içində yerləşdir
+            tree.position.set(Math.random()*worldSize - worldSize/2, 1.25, Math.random()*worldSize - worldSize/2);
+            scene.add(tree);
+            env.push(tree);
         }
 
         function createSnake(x, z, isPlayer) {
-            const segments = isPlayer ? 5 : 20; // Rəqiblər daha yekədir
             const color = isPlayer ? 0x00f2fe : 0xff4400;
-            const body = [];
-            for(let i=0; i<segments; i++) {
-                const seg = new THREE.Mesh(
-                    new THREE.SphereGeometry(isPlayer ? 0.6 : 1.2, 16, 16),
-                    new THREE.MeshPhongMaterial({color: color, emissive: color, emissiveIntensity: 0.2})
-                );
-                seg.position.set(x - i, 0.6, z);
-                scene.add(seg);
-                body.push(seg);
-            }
-            if(isPlayer) player = body;
-            else enemies.push({body: body, dir: new THREE.Vector3(0.1, 0, 0)});
-        }
-
-        function spawnMegaEnemy() {
-            createSnake(Math.random()*100-50, Math.random()*100-50, false);
+            const head = new THREE.Mesh(
+                new THREE.SphereGeometry(0.7, 16, 16),
+                new THREE.MeshPhongMaterial({color: color, emissive: color, emissiveIntensity: 0.3})
+            );
+            head.position.set(x, 0.7, z);
+            scene.add(head);
+            if(isPlayer) player.unshift(head);
         }
 
         function spawnFood() {
-            if(food) scene.remove(food);
-            food = new THREE.Mesh(
+            const food = new THREE.Mesh(
                 new THREE.SphereGeometry(0.5, 16, 16),
                 new THREE.MeshPhongMaterial({color: 0xff0055, emissive: 0xff0055})
             );
-            food.position.set(Math.random()*100-50, 0.5, Math.random()*100-50);
+            // Ağaca dəyməməsi üçün yerləşdir
+            let pos;
+            do {
+                pos = new THREE.Vector3(Math.random()*(worldSize-10)-worldSize/2+5, 0.5, Math.random()*(worldSize-10)-worldSize/2+5);
+            } while(checkNatureCollision(pos));
+            
+            food.position.copy(pos);
             scene.add(food);
+            foods.push(food);
+        }
+
+        function checkNatureCollision(pos) {
+            for(let obj of env) {
+                if(pos.distanceTo(obj.position) < 2) return true;
+            }
+            return false;
         }
 
         function initJoystick() {
@@ -161,8 +168,8 @@
                 const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 50);
 
                 stick.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
-                moveDir.x = Math.cos(angle) * 0.2;
-                moveDir.z = Math.sin(angle) * 0.2;
+                moveDir.x = Math.cos(angle) * 0.22;
+                moveDir.z = Math.sin(angle) * 0.22;
             };
 
             zone.addEventListener('touchstart', () => active = true);
@@ -173,49 +180,48 @@
         function animate(time) {
             requestAnimationFrame(animate);
             
-            // FPS Hesablama
+            // FPS
             frameCount++;
             if (time - lastTime >= 1000) {
-                fps = frameCount;
-                document.getElementById('fps-counter').innerText = `FPS: ${fps}`;
-                frameCount = 0;
-                lastTime = time;
+                document.getElementById('fps-counter').innerText = `FPS: ${frameCount}`;
+                frameCount = 0; lastTime = time;
             }
 
-            // Oyunçu Hərəkəti (Yumşaq İlan Effekti)
+            // İlan Hərəkəti (Real İlan Effekti)
+            const head = player[0];
+            const oldPos = head.position.clone();
+            head.position.add(moveDir);
+
             for(let i = player.length - 1; i > 0; i--) {
-                player[i].position.lerp(player[i-1].position, 0.3);
+                player[i].position.lerp(player[i-1].position, 0.35);
             }
-            player[0].position.add(moveDir);
 
-            // Kamera Takibi
-            camera.position.lerp(new THREE.Vector3(player[0].position.x, 15, player[0].position.z + 20), 0.1);
-            camera.lookAt(player[0].position);
+            // Kamera Mənzərə Takibi
+            const camTarget = new THREE.Vector3(head.position.x, head.position.y + 12, head.position.z + 20);
+            camera.position.lerp(camTarget, 0.1);
+            camera.lookAt(head.position);
 
             // Yemək Yemə
-            if(player[0].position.distanceTo(food.position) < 1.5) {
-                score += 10;
-                document.getElementById('score').innerText = score;
-                spawnFood();
-                growPlayer();
-            }
-
-            // Rəqiblərin hərəkəti (AI)
-            enemies.forEach(en => {
-                for(let i = en.body.length - 1; i > 0; i--) {
-                    en.body[i].position.lerp(en.body[i-1].position, 0.1);
+            foods.forEach((food, index) => {
+                if(head.position.distanceTo(food.position) < 1.6) {
+                    score += 10;
+                    document.getElementById('score').innerText = score;
+                    scene.remove(food);
+                    foods.splice(index, 1);
+                    spawnFood(); // Yenisini yarat
+                    growPlayer();
                 }
-                if(Math.random() < 0.02) en.dir.applyAxisAngle(new THREE.Vector3(0,1,0), (Math.random()-0.5));
-                en.body[0].position.add(en.dir);
-                
-                // Rəqiblə toqquşma
-                if(player[0].position.distanceTo(en.body[0].position) < 2) location.reload();
             });
 
-            // Ətraf mühitlə toqquşma
+            // Təbiətlə Toqquşma
             env.forEach(obj => {
-                if(player[0].position.distanceTo(obj.position) < 2) location.reload();
+                if(head.position.distanceTo(obj.position) < 1.8) { location.reload(); }
             });
+
+            // Xəritədən kənara çıxma
+            if(Math.abs(head.position.x) > worldSize/2 || Math.abs(head.position.z) > worldSize/2) {
+                location.reload();
+            }
 
             renderer.render(scene, camera);
         }
@@ -223,7 +229,7 @@
         function growPlayer() {
             const last = player[player.length-1];
             const seg = new THREE.Mesh(
-                new THREE.SphereGeometry(0.6, 16, 16),
+                new THREE.SphereGeometry(0.7, 16, 16),
                 new THREE.MeshPhongMaterial({color: 0x00f2fe})
             );
             seg.position.copy(last.position);
