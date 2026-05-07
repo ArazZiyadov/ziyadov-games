@@ -3,82 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ziyadov Games Portal</title>
+    <title>Ziyadov Games</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
 
         body {
-            margin: 0; background: #050a0f; color: white;
-            font-family: 'Rajdhani', sans-serif; overflow-x: hidden;
+            margin: 0; padding: 0; background-color: #050a0f; color: white;
+            font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column; align-items: center;
         }
 
+        /* Header */
         header {
-            padding: 20px; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid rgba(0, 242, 254, 0.1);
+            width: 100%; padding: 20px 0; display: flex; justify-content: space-around; align-items: center;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.1); position: sticky; top: 0; background: #050a0f; z-index: 100;
         }
-        .logo { font-family: 'Orbitron', sans-serif; color: #00f2fe; font-weight: bold; letter-spacing: 2px; font-size: 18px; }
-        .nav-links a { color: #00ff88; text-decoration: none; font-weight: bold; font-size: 14px; margin-left: 15px; }
+        .logo { font-family: 'Orbitron', sans-serif; font-weight: 700; color: #00f2fe; letter-spacing: 2px; text-decoration: none; }
+        .nav-links a { color: white; text-decoration: none; margin: 0 10px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .nav-links .support-link { color: #00ff88; }
 
-        .page-title { text-align: center; margin: 40px 0; }
-        .page-title h1 { font-family: 'Orbitron', sans-serif; font-size: 24px; letter-spacing: 5px; margin: 0; }
-        
-        .divider { display: flex; align-items: center; width: 85%; margin: 20px auto; }
-        .line { flex: 1; height: 1px; background: rgba(0, 242, 254, 0.3); }
-        .divider-text { padding: 0 15px; color: #00f2fe; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+        /* Ana Portal Görünüşü */
+        .hero { text-align: center; margin-top: 40px; }
+        .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 28px; letter-spacing: 5px; margin: 0; }
+        .hero p { color: #8b949e; font-size: 13px; margin-top: 5px; }
 
-        .container { display: flex; flex-direction: column; align-items: center; gap: 25px; padding-bottom: 50px; }
+        .divider { width: 90%; display: flex; align-items: center; margin: 30px 0; }
+        .divider-text { color: #00f2fe; padding: 0 15px; font-size: 16px; font-family: 'Orbitron'; white-space: nowrap; }
+        .line { flex-grow: 1; height: 1px; background: rgba(0, 242, 254, 0.3); }
+
+        .game-container { width: 95%; max-width: 400px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 50px; }
         
         .card {
-            width: 85%; max-width: 350px; background: #0a1219; border-radius: 25px;
-            padding: 25px; text-align: center; border: 1px solid rgba(0, 242, 254, 0.1);
-            transition: 0.3s;
+            background: #0a1219; border: 2px solid rgba(0, 242, 254, 0.1);
+            border-radius: 25px; padding: 25px; text-align: center; transition: 0.3s;
         }
-        .card:hover { border-color: #00f2fe; box-shadow: 0 0 20px rgba(0, 242, 254, 0.2); }
-        
-        .card-icon { font-size: 45px; margin-bottom: 10px; display: block; filter: drop-shadow(0 0 8px #00f2fe); }
+        .card:hover { border-color: #00f2fe; box-shadow: 0 0 15px rgba(0, 242, 254, 0.2); }
+        .card .icon { font-size: 45px; margin-bottom: 10px; display: block; filter: drop-shadow(0 0 10px #00f2fe); }
         .card h2 { font-family: 'Orbitron', sans-serif; margin: 10px 0; font-size: 20px; }
-        .card p { color: #8b949e; font-size: 14px; margin-bottom: 20px; line-height: 1.4; }
-        
+        .card p { color: #8b949e; font-size: 14px; margin-bottom: 20px; }
+
         .btn-play {
-            width: 100%; padding: 14px; border-radius: 15px; border: none;
-            background: linear-gradient(90deg, #00f2fe, #4facfe);
-            color: #050a0f; font-weight: bold; font-family: 'Orbitron', sans-serif;
-            cursor: pointer; font-size: 16px; transition: 0.2s;
+            width: 80%; background: linear-gradient(90deg, #00f2fe, #4facfe);
+            border: none; padding: 12px; border-radius: 15px; color: #050a0f;
+            font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer;
         }
-        .btn-play:active { transform: scale(0.95); }
 
-        /* Dəstək Bölməsi Stil (Yaşıl Neon) */
-        .support-card { border: 1px solid #00ff88; background: #0a1914; }
-        .support-card h2 { color: #00ff88; }
-        .highlight { color: #00f2fe; font-weight: bold; }
-
-        /* Klik Oyunu Ekranı */
-        #clicker-screen {
+        /* AYRICA SƏHİFƏLƏR (Dəstək və Klik) */
+        .full-screen-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #050a0f; z-index: 2000; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; box-sizing: border-box; text-align: center;
         }
-        #score-display { font-size: 40px; margin-bottom: 30px; font-family: 'Orbitron'; color: #00f2fe; }
-        .click-ball {
-            width: 180px; height: 180px; background: radial-gradient(circle, #00f2fe, #005f73);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 60px; cursor: pointer; box-shadow: 0 0 40px rgba(0,242,254,0.6); user-select: none;
+
+        /* Dəstək Ol xüsusi stil */
+        .support-box {
+            border: 2px solid #00ff88; background: #0a1914; border-radius: 30px;
+            padding: 30px; width: 90%; max-width: 400px;
+        }
+        .support-box h2 { color: #00ff88; font-family: 'Orbitron'; font-size: 30px; margin-bottom: 20px; }
+        .support-box p { line-height: 1.6; font-size: 16px; color: #ccd6f6; text-align: left; }
+        .highlight { color: #00f2fe; font-weight: bold; }
+
+        .btn-back {
+            margin-top: 30px; background: transparent; border: 1px solid white;
+            color: white; padding: 10px 30px; border-radius: 10px; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">ZIYADOV GAMES</div>
+        <a href="index.html" class="logo">ZIYADOV GAMES</a>
         <div class="nav-links">
-            <a href="#" style="color: #00f2fe;">OYUNLAR</a>
-            <a href="#support-section">DƏSTƏK OL</a>
+            <a onclick="showView('main-portal')">OYUNLAR</a>
+            <a onclick="showView('support-view')" class="support-link">DƏSTƏK OL</a>
         </div>
     </header>
 
-    <div id="main-portal">
-        <div class="page-title">
+    <div id="main-portal" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+        <div class="hero">
             <h1>ZIYADOV GAMES</h1>
-            <p style="color: #8b949e; font-size: 11px; margin-top: 8px; letter-spacing: 1px;">Azərbaycanın mini oyun portalı</p>
+            <p>Azərbaycanın mini oyun portalı</p>
         </div>
 
         <div class="divider">
@@ -87,64 +91,66 @@
             <div class="line"></div>
         </div>
 
-        <div class="container">
+        <div class="game-container">
             <div class="card">
-                <span class="card-icon">⚡</span>
+                <span class="icon">⚡</span>
                 <h2>Core Clicker</h2>
                 <p>Klikləmə sürətini sına və rekord qır!</p>
-                <button class="btn-play" onclick="openClicker()">İNDİ OYNA</button>
+                <button class="btn-play" onclick="showView('clicker-view')">İNDİ OYNA</button>
             </div>
 
             <div class="card">
-                <span class="card-icon">🐉</span>
+                <span class="icon">🐉</span>
                 <h2>Neon Snake</h2>
                 <p>Klassik ilan oyunu modern dizaynda.</p>
                 <button class="btn-play" onclick="location.href='snake.html'">İNDİ OYNA</button>
             </div>
 
             <div class="card">
-                <span class="card-icon">🏃‍♂️</span>
+                <span class="icon">🏃‍♂️</span>
                 <h2>Subway Surfer</h2>
                 <p>Maneələrdən qaç, tullan və qızılları topla!</p>
                 <button class="btn-play" onclick="location.href='surfer.html'">İNDİ OYNA</button>
             </div>
-
-            <div id="support-section" class="card support-card">
-                <h2 style="font-size: 22px;">DƏSTƏK OL 🚀</h2>
-                <p style="text-align: left; opacity: 0.9;">
-                    Salam! Mən <span class="highlight">Ziyadov</span>. Mən gənc bir gəlişdiriciyəm və bu layihəni tamamilə tək başıma idarə edirəm. 
-                    Məqsədim sizlər üçün keyfiyyətli mini-oyun portalı yaratmaqdır.
-                </p>
-                <p style="text-align: left; opacity: 0.9;">
-                    Dəstəyinizlə sistemi təkmilləşdirə bilərəm. <span style="color:#00ff88">Hansı oyunların gəlməsini istədiyinizi</span> yaza bilərsiniz!
-                </p>
-                <button class="btn-play" style="background:#00ff88; color: #0a1914;" onclick="window.open('https://t.me/Ziyadov', '_blank')">MESAJ YAZ</button>
-            </div>
         </div>
     </div>
 
-    <div id="clicker-screen">
-        <div id="score-display">0</div>
-        <div class="click-ball" onclick="tap()">⚡</div>
-        <button class="btn-play" style="width:150px; margin-top:60px; background:#ff4400" onclick="closeClicker()">GERİ</button>
+    <div id="support-view" class="full-screen-overlay">
+        <div class="support-box">
+            <span>🚀</span>
+            <h2>DƏSTƏK OL</h2>
+            <p>Salam! Mən <span class="highlight">Ziyadov</span>. Mən gənc bir gəlişdiriciyəm və bu layihəni tamamilə tək başıma idarə edirəm. Məqsədim sizlər üçün ən keyfiyyətli və maraqlı mini-oyun portalını yaratmaqdır.</p>
+            <p>Sizin dəstəyiniz sayəsində yeni oyunlar əlavə edə bilərəm. Dəstək olmaq üçün mənə yaza bilərsiniz!</p>
+            <button class="btn-play" style="background:#00ff88; color:#050a0f;" onclick="window.open('https://wa.me/994515114568', '_blank')">WHATSAPP İLƏ YAZ</button>
+        </div>
+        <button class="btn-back" onclick="showView('main-portal')">GERİ QAYIT</button>
+    </div>
+
+    <div id="clicker-view" class="full-screen-overlay">
+        <h1 id="count" style="font-size: 70px; color: #00f2fe; font-family: 'Orbitron';">0</h1>
+        <div onclick="tap()" style="width: 200px; height: 200px; background: radial-gradient(circle, #00f2fe, #005f73); border-radius: 50%; box-shadow: 0 0 40px #00f2fe; display: flex; align-items: center; justify-content: center; font-size: 60px; cursor: pointer; user-select: none;">⚡</div>
+        <button class="btn-back" onclick="showView('main-portal')" style="border-color: #ff4400; color: #ff4400;">OYUNU BİTİR</button>
     </div>
 
     <script>
-        let count = 0;
-
-        function openClicker() {
+        function showView(viewId) {
+            // Hamısını bağla
             document.getElementById('main-portal').style.display = 'none';
-            document.getElementById('clicker-screen').style.display = 'flex';
+            document.getElementById('support-view').style.display = 'none';
+            document.getElementById('clicker-view').style.display = 'none';
+            
+            // Seçiləni aç
+            if(viewId === 'main-portal') {
+                document.getElementById(viewId).style.display = 'flex';
+            } else {
+                document.getElementById(viewId).style.display = 'flex';
+            }
         }
 
-        function closeClicker() {
-            document.getElementById('clicker-screen').style.display = 'none';
-            document.getElementById('main-portal').style.display = 'block';
-        }
-
+        let score = 0;
         function tap() {
-            count++;
-            document.getElementById('score-display').innerText = count;
+            score++;
+            document.getElementById('count').innerText = score;
         }
     </script>
 </body>
