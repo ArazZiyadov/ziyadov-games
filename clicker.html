@@ -26,7 +26,6 @@
             touch-action: manipulation;
         }
 
-        /* Arxa fon işığı */
         .glow {
             position: absolute;
             width: 300px;
@@ -37,7 +36,6 @@
             z-index: -1;
         }
 
-        /* Statistika */
         .stats {
             position: absolute;
             top: 50px;
@@ -61,7 +59,6 @@
             text-transform: uppercase;
         }
 
-        /* Clicker Şəkli və Animasiya */
         .click-area {
             position: relative;
             width: 300px;
@@ -82,12 +79,10 @@
             -webkit-user-drag: none;
         }
 
-        /* Klikləyəndə 3D basılma effekti */
         .click-area:active #game-obj {
             transform: scale(0.9) rotate(-3deg);
         }
 
-        /* Rekord hissəsi */
         .high-score {
             position: absolute;
             bottom: 130px;
@@ -99,7 +94,6 @@
             text-align: center;
         }
 
-        /* Təbrik Mesajı */
         #msg {
             position: absolute;
             top: 25%;
@@ -154,7 +148,6 @@
         let best = localStorage.getItem('ziyadovBest') || 0;
         document.getElementById('best').innerText = best;
 
-        // Audio sistemi
         let audioCtx;
         function initAudio() {
             if (!audioCtx) {
@@ -179,32 +172,23 @@
             osc.stop(audioCtx.currentTime + 0.05);
         }
 
-        function playAnnounce() {
-            const speech = new SpeechSynthesisUtterance();
-            speech.text = "Təbriklər, yeni mərhələ";
-            speech.lang = "tr-TR"; 
-            window.speechSynthesis.speak(speech);
-        }
-
         function clickAction() {
             initAudio();
             score++;
             document.getElementById('score').innerText = score;
             playTik();
 
-            // Rekord yoxla
             if(score > best) {
                 best = score;
                 localStorage.setItem('ziyadovBest', best);
                 document.getElementById('best').innerText = best;
             }
 
-            // Hər 20 klikdə Level artır
             if(score % 20 === 0) {
                 level++;
                 document.getElementById('level').innerText = level;
                 showMsg();
-                playAnnounce();
+                // Danışıq səsi funksiyası burdan silindi
             }
         }
 
