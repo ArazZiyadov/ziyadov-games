@@ -12,7 +12,6 @@
             font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column; align-items: center;
         }
 
-        /* Header */
         header {
             width: 100%; padding: 20px 0; display: flex; justify-content: space-around; align-items: center;
             border-bottom: 1px solid rgba(0, 242, 254, 0.1); position: sticky; top: 0; background: #050a0f; z-index: 100;
@@ -21,58 +20,60 @@
         .nav-links a { color: white; text-decoration: none; margin: 0 10px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .nav-links .support-link { color: #00ff88; }
 
-        /* Ana Portal Görünüşü */
-        .hero { text-align: center; margin-top: 40px; }
-        .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 28px; letter-spacing: 5px; margin: 0; }
-        .hero p { color: #8b949e; font-size: 13px; margin-top: 5px; }
+        .hero { text-align: center; margin-top: 20px; }
+        .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 24px; letter-spacing: 3px; margin: 0; }
 
-        .divider { width: 90%; display: flex; align-items: center; margin: 30px 0; }
-        .divider-text { color: #00f2fe; padding: 0 15px; font-size: 16px; font-family: 'Orbitron'; white-space: nowrap; }
-        .line { flex-grow: 1; height: 1px; background: rgba(0, 242, 254, 0.3); }
-
-        .game-container { width: 95%; max-width: 400px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 50px; }
+        .game-container { width: 95%; max-width: 450px; display: flex; flex-direction: column; gap: 25px; padding: 20px 0 100px 0; }
         
+        /* OYUN KARTI STİLİ */
         .card {
-            background: #0a1219; border: 2px solid rgba(0, 242, 254, 0.1);
-            border-radius: 25px; padding: 25px; text-align: center; transition: 0.3s;
+            background: #0a1219; border-radius: 20px; overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s;
         }
-        .card:hover { border-color: #00f2fe; box-shadow: 0 0 15px rgba(0, 242, 254, 0.2); }
-        .card .icon { font-size: 45px; margin-bottom: 10px; display: block; filter: drop-shadow(0 0 10px #00f2fe); }
-        .card h2 { font-family: 'Orbitron', sans-serif; margin: 10px 0; font-size: 20px; }
-        .card p { color: #8b949e; font-size: 14px; margin-bottom: 20px; }
+        .game-img {
+            width: 100%; height: 180px; background-size: cover; background-position: center;
+            position: relative; border-bottom: 2px solid #00f2fe;
+        }
+        .card-content { padding: 15px; text-align: left; }
+        .card h2 { font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 5px 0; color: #00f2fe; }
+        
+        /* LIKE VƏ REYTİNQ BÖLMƏSİ */
+        .interaction-bar {
+            display: flex; align-items: center; gap: 15px; margin-top: 10px; padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .like-btn { color: #00ff88; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .dislike-btn { color: #ff4444; cursor: pointer; font-size: 14px; }
+        .rating-text { color: #8b949e; font-size: 12px; margin-left: auto; }
+
+        /* YORUM BÖLMƏSİ */
+        .comment-box {
+            margin-top: 10px; display: flex; gap: 5px;
+        }
+        .comment-input {
+            flex: 1; background: #161b22; border: 1px solid #30363d; border-radius: 5px;
+            padding: 8px; color: white; font-size: 12px;
+        }
+        .send-btn { background: #00f2fe; border: none; border-radius: 5px; padding: 0 10px; cursor: pointer; color: #050a0f; }
 
         .btn-play {
-            width: 80%; background: linear-gradient(90deg, #00f2fe, #4facfe);
-            border: none; padding: 12px; border-radius: 15px; color: #050a0f;
-            font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer;
+            width: 100%; background: linear-gradient(90deg, #00f2fe, #4facfe);
+            border: none; padding: 12px; border-radius: 10px; color: #050a0f;
+            font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; margin-top: 10px;
         }
 
-        /* AYRICA SƏHİFƏLƏR (Dəstək və Klik) */
         .full-screen-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #050a0f; z-index: 2000; flex-direction: column; align-items: center; justify-content: center;
             padding: 20px; box-sizing: border-box; text-align: center;
         }
-
-        /* Dəstək Ol xüsusi stil */
-        .support-box {
-            border: 2px solid #00ff88; background: #0a1914; border-radius: 30px;
-            padding: 30px; width: 90%; max-width: 400px;
-        }
-        .support-box h2 { color: #00ff88; font-family: 'Orbitron'; font-size: 30px; margin-bottom: 20px; }
-        .support-box p { line-height: 1.6; font-size: 16px; color: #ccd6f6; text-align: left; }
-        .highlight { color: #00f2fe; font-weight: bold; }
-
-        .btn-back {
-            margin-top: 30px; background: transparent; border: 1px solid white;
-            color: white; padding: 10px 30px; border-radius: 10px; cursor: pointer;
-        }
+        .support-box { border: 2px solid #00ff88; background: #0a1914; border-radius: 30px; padding: 30px; max-width: 400px; }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" class="logo">ZIYADOV GAMES</a>
+        <a href="#" class="logo" onclick="showView('main-portal')">ZIYADOV GAMES</a>
         <div class="nav-links">
             <a onclick="showView('main-portal')">OYUNLAR</a>
             <a onclick="showView('support-view')" class="support-link">DƏSTƏK OL</a>
@@ -81,76 +82,79 @@
 
     <div id="main-portal" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
         <div class="hero">
-            <h1>ZIYADOV GAMES</h1>
-            <p>Azərbaycanın mini oyun portalı</p>
-        </div>
-
-        <div class="divider">
-            <div class="line"></div>
-            <div class="divider-text">OYUNLAR SİYAHISI</div>
-            <div class="line"></div>
+            <h1>PORTAL OYUNLARI</h1>
         </div>
 
         <div class="game-container">
+            
             <div class="card">
-                <span class="icon">⚡</span>
-                <h2>Core Clicker</h2>
-                <p>Klikləmə sürətini sına və rekord qır!</p>
-                <button class="btn-play" onclick="showView('clicker-view')">İNDİ OYNA</button>
+                <div class="game-img" style="background-image: url('snake.jpg');"></div>
+                <div class="card-content">
+                    <h2>Snake 3D</h2>
+                    <div class="interaction-bar">
+                        <div class="like-btn" onclick="this.innerHTML='👍 96%'">👍 95%</div>
+                        <div class="dislike-btn">👎</div>
+                        <div class="rating-text">125 Levels</div>
+                    </div>
+                    <div class="comment-box">
+                        <input type="text" class="comment-input" placeholder="Rəy yazın...">
+                        <button class="send-btn">✈</button>
+                    </div>
+                    <button class="btn-play" onclick="location.href='snake.html'">İNDİ OYNA</button>
+                </div>
             </div>
 
             <div class="card">
-                <span class="icon">🐉</span>
-                <h2>Neon Snake</h2>
-                <p>Klassik ilan oyunu modern dizaynda.</p>
-                <button class="btn-play" onclick="location.href='snake.html'">İNDİ OYNA</button>
+                <div class="game-img" style="background-image: url('surfer.jpg');"></div>
+                <div class="card-content">
+                    <h2>Subway Surfer</h2>
+                    <div class="interaction-bar">
+                        <div class="like-btn" onclick="this.innerHTML='👍 92%'">👍 91%</div>
+                        <div class="dislike-btn">👎</div>
+                        <div class="rating-text">High Speed</div>
+                    </div>
+                    <div class="comment-box">
+                        <input type="text" class="comment-input" placeholder="Rəy yazın...">
+                        <button class="send-btn">✈</button>
+                    </div>
+                    <button class="btn-play" onclick="location.href='surfer.html'">İNDİ OYNA</button>
+                </div>
             </div>
 
             <div class="card">
-                <span class="icon">🏃‍♂️</span>
-                <h2>Subway Surfer</h2>
-                <p>Maneələrdən qaç, tullan və qızılları topla!</p>
-                <button class="btn-play" onclick="location.href='surfer.html'">İNDİ OYNA</button>
+                <div class="game-img" style="background-image: url('clicker.jpg'); background-color: #00f2fe22;"></div>
+                <div class="card-content">
+                    <h2>Core Clicker</h2>
+                    <div class="interaction-bar">
+                        <div class="like-btn" onclick="this.innerHTML='👍 99%'">👍 98%</div>
+                        <div class="dislike-btn">👎</div>
+                        <div class="rating-text">Non-stop XP</div>
+                    </div>
+                    <div class="comment-box">
+                        <input type="text" class="comment-input" placeholder="Rəy yazın...">
+                        <button class="send-btn">✈</button>
+                    </div>
+                    <button class="btn-play" onclick="showView('clicker-view')">İNDİ OYNA</button>
+                </div>
             </div>
+
         </div>
     </div>
 
     <div id="support-view" class="full-screen-overlay">
         <div class="support-box">
-            <span>🚀</span>
-            <h2>DƏSTƏK OL</h2>
-            <p>Salam! Mən <span class="highlight">Ziyadov</span>. Mən gənc bir gəlişdiriciyəm və bu layihəni tamamilə tək başıma idarə edirəm. Məqsədim sizlər üçün ən keyfiyyətli və maraqlı mini-oyun portalını yaratmaqdır.</p>
-            <p>Sizin dəstəyiniz sayəsində yeni oyunlar əlavə edə bilərəm. Dəstək olmaq üçün mənə yaza bilərsiniz!</p>
-            <button class="btn-play" style="background:#00ff88; color:#050a0f;" onclick="window.open('https://wa.me/994515114568', '_blank')">WHATSAPP İLƏ YAZ</button>
+            <h2 style="color: #00ff88; font-family: 'Orbitron';">DƏSTƏK OL</h2>
+            <p>Salam! Mən <b>Ziyadov</b>. Mən gənc bir gəlişdiriciyəm və bu portalı tək başıma idarə edirəm.</p>
+            <button class="btn-play" style="background:#00ff88; color:#050a0f;" onclick="window.open('https://wa.me/994515114568', '_blank')">WHATSAPP: 051 511 45 68</button>
         </div>
-        <button class="btn-back" onclick="showView('main-portal')">GERİ QAYIT</button>
-    </div>
-
-    <div id="clicker-view" class="full-screen-overlay">
-        <h1 id="count" style="font-size: 70px; color: #00f2fe; font-family: 'Orbitron';">0</h1>
-        <div onclick="tap()" style="width: 200px; height: 200px; background: radial-gradient(circle, #00f2fe, #005f73); border-radius: 50%; box-shadow: 0 0 40px #00f2fe; display: flex; align-items: center; justify-content: center; font-size: 60px; cursor: pointer; user-select: none;">⚡</div>
-        <button class="btn-back" onclick="showView('main-portal')" style="border-color: #ff4400; color: #ff4400;">OYUNU BİTİR</button>
+        <button onclick="showView('main-portal')" style="background:none; border:1px solid white; color:white; padding:10px; margin-top:20px; border-radius:10px;">GERİ</button>
     </div>
 
     <script>
         function showView(viewId) {
-            // Hamısını bağla
             document.getElementById('main-portal').style.display = 'none';
             document.getElementById('support-view').style.display = 'none';
-            document.getElementById('clicker-view').style.display = 'none';
-            
-            // Seçiləni aç
-            if(viewId === 'main-portal') {
-                document.getElementById(viewId).style.display = 'flex';
-            } else {
-                document.getElementById(viewId).style.display = 'flex';
-            }
-        }
-
-        let score = 0;
-        function tap() {
-            score++;
-            document.getElementById('count').innerText = score;
+            document.getElementById(viewId).style.display = 'flex';
         }
     </script>
 </body>
