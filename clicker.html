@@ -115,12 +115,6 @@
             border: 1px solid #30363d;
             padding: 10px 30px;
             border-radius: 50px;
-            transition: 0.3s;
-        }
-
-        .back-link:hover {
-            background: #161b22;
-            color: white;
         }
     </style>
 </head>
@@ -143,6 +137,13 @@
     <a href="index.html" class="back-link">← GERİ QAYIT</a>
 
     <script>
+        // Danışıq səsini (qız səsini) kod başladığı an bloklayırıq
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            // Brauzerin danışma funksiyasını boş bir funksiya ilə əvəz edirik ki, heç nə deyə bilməsin
+            window.speechSynthesis.speak = function() { return; };
+        }
+
         let score = 0;
         let level = 1;
         let best = localStorage.getItem('ziyadovBest') || 0;
@@ -150,14 +151,11 @@
 
         let audioCtx;
         function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
         }
 
+        // TIK SƏSİ BURADADIR (BU QALDI)
         function playTik() {
             initAudio();
             const osc = audioCtx.createOscillator();
@@ -176,6 +174,8 @@
             initAudio();
             score++;
             document.getElementById('score').innerText = score;
+            
+            // Tik səsi işləyir
             playTik();
 
             if(score > best) {
@@ -188,7 +188,7 @@
                 level++;
                 document.getElementById('level').innerText = level;
                 showMsg();
-                // Danışıq səsi funksiyası burdan silindi
+                // Burada heç bir danışıq funksiyası yoxdur
             }
         }
 
