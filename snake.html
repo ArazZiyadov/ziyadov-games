@@ -3,126 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Snake | Ziyadov Games</title>
+    <title>3D World Snake | Ziyadov Games</title>
     <style>
-        body { 
-            background: #05070a; 
-            color: white; 
-            text-align: center; 
-            font-family: 'Orbitron', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            overflow: hidden;
-            touch-action: none; /* Ekranın sürüşməsini bağlayır */
+        body { margin: 0; background: #05070a; overflow: hidden; font-family: 'Orbitron', sans-serif; }
+        #ui {
+            position: absolute; top: 20px; left: 20px; color: #00f2fe;
+            font-size: 20px; text-shadow: 0 0 10px #00f2fe; pointer-events: none;
+            background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px;
         }
-        canvas { 
-            border: 4px solid #00f2fe; 
-            background: #0d1117; 
-            box-shadow: 0 0 30px rgba(0, 242, 254, 0.4);
-            max-width: 90vw;
-            max-height: 60vh;
+        .controls {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: grid; grid-template-columns: repeat(3, 70px); gap: 10px;
         }
-        .score-box { font-size: 24px; color: #00f2fe; margin-bottom: 15px; text-shadow: 0 0 10px #00f2fe; }
-        .controls-info { margin-top: 15px; color: #484f58; font-size: 14px; }
-        .back-btn { margin-top: 20px; color: #8b949e; text-decoration: none; border: 1px solid #30363d; padding: 10px 25px; border-radius: 12px; }
+        .btn {
+            width: 70px; height: 70px; background: rgba(0, 242, 254, 0.1);
+            border: 2px solid #00f2fe; border-radius: 50%; color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; cursor: pointer; user-select: none;
+            backdrop-filter: blur(5px);
+        }
+        .btn:active { background: #00f2fe; color: black; transform: scale(0.9); }
+        #back { position: absolute; top: 20px; right: 20px; color: #8b949e; text-decoration: none; border: 1px solid #30363d; padding: 5px 15px; border-radius: 10px; font-size: 12px; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="score-box">XAL: <span id="scoreVal">0</span></div>
-    <canvas id="snakeGame" width="400" height="400"></canvas>
-    
-    <div class="controls-info">İdarə etmək üçün ekranın tərəflərinə toxun</div>
-    
-    <a href="index.html" class="back-btn">← GERİ QAYIT</a>
+    <div id="ui">
+        XAL: <span id="score">0</span> | MƏRHƏLƏ: <span id="lvl">1</span>
+    </div>
+    <a href="index.html" id="back">GERİ</a>
+
+    <div class="controls">
+        <div></div><div class="btn" onclick="changeDir(0, 1)">↑</div><div></div>
+        <div class="btn" onclick="changeDir(-1, 0)">←</div><div class="btn" onclick="changeDir(0, -1)">↓</div><div class="btn" onclick="changeDir(1, 0)">→</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        const canvas = document.getElementById("snakeGame");
-        const ctx = canvas.getContext("2d");
-        const box = 20;
-        let score = 0;
-        let snake = [{ x: 9 * box, y: 10 * box }];
-        let food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
-        let d;
+        let scene, camera, renderer, snake = [], enemies = [], trees = [], food;
+        let direction = { x: 1, z: 0 }, nextDir = { x: 1, z: 0 };
+        let score = 0, level = 1;
+        const gridSize = 40; // Yekə xəritə
 
-        // Klaviatura idarəetməsi
-        document.addEventListener("keydown", direction);
-        function direction(event) {
-            if(event.keyCode == 37 && d != "RIGHT") d = "LEFT";
-            else if(event.keyCode == 38 && d != "DOWN") d = "UP";
-            else if(event.keyCode == 39 && d != "LEFT") d = "RIGHT";
-            else if(event.keyCode == 40 && d != "UP") d = "DOWN";
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x020406);
+            scene.fog = new THREE.Fog(0x020406, 10, 50);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 20, 20);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // İşıqlandırma
+            const sun = new THREE.DirectionalLight(0xffffff, 1);
+            sun.position.set(10, 20, 10);
+            scene.add(sun);
+            scene.add(new THREE.AmbientLight(0x404040));
+
+            // Zəmin (Xəritə)
+            const floorGeo = new THREE.PlaneGeometry(gridSize, gridSize);
+            const floorMat = new THREE.MeshPhongMaterial({ color: 0x1a1a1a });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            const grid = new THREE.GridHelper(gridSize, gridSize, 0x00f2fe, 0x222222);
+            scene.add(grid);
+
+            // Ağaclar əlavə edək
+            for(let i=0; i<15; i++) createTree();
+
+            // Rəqibləri yarat
+            for(let i=0; i<3; i++) spawnEnemy();
+
+            createSnakePart(0, 0, true);
+            spawnFood();
+
+            setInterval(update, 150);
         }
 
-        // MOBİL ÜÇÜN: Ekrana toxunma ilə idarəetmə
-        canvas.addEventListener("touchstart", function(e) {
-            let rect = canvas.getBoundingClientRect();
-            let touchX = e.touches[0].clientX - rect.left;
-            let touchY = e.touches[0].clientY - rect.top;
-            let centerX = rect.width / 2;
-            let centerY = rect.height / 2;
+        function createTree() {
+            const group = new THREE.Group();
+            const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.5, 0.4), new THREE.MeshPhongMaterial({color: 0x4d2600}));
+            const leaves = new THREE.Mesh(new THREE.ConeGeometry(1, 2, 8), new THREE.MeshPhongMaterial({color: 0x006400}));
+            leaves.position.y = 1.5;
+            group.add(trunk); group.add(leaves);
+            group.position.set(Math.random()*gridSize-gridSize/2, 0.5, Math.random()*gridSize-gridSize/2);
+            scene.add(group);
+            trees.push(group);
+        }
 
-            if (Math.abs(touchX - centerX) > Math.abs(touchY - centerY)) {
-                if (touchX > centerX && d != "LEFT") d = "RIGHT";
-                else if (touchX < centerX && d != "RIGHT") d = "LEFT";
+        function createSnakePart(x, z, isPlayer) {
+            const geo = new THREE.BoxGeometry(0.9, 0.9, 0.9);
+            const mat = new THREE.MeshPhongMaterial({ color: isPlayer ? 0x00f2fe : 0xffaa00 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(Math.round(x), 0.5, Math.round(z));
+            scene.add(mesh);
+            if(isPlayer) snake.unshift(mesh);
+            return mesh;
+        }
+
+        function spawnEnemy() {
+            let e = { body: [], dir: {x: 1, z: 0} };
+            const x = Math.random()*10 - 5;
+            const z = Math.random()*10 - 5;
+            e.body.push(createSnakePart(x, z, false));
+            enemies.push(e);
+        }
+
+        function spawnFood() {
+            if(food) scene.remove(food);
+            food = new THREE.Mesh(new THREE.SphereGeometry(0.4), new THREE.MeshPhongMaterial({color: 0xff0055, emissive: 0xff0055}));
+            food.position.set(Math.floor(Math.random()*(gridSize-2)-gridSize/2+1), 0.5, Math.floor(Math.random()*(gridSize-2)-gridSize/2+1));
+            scene.add(food);
+        }
+
+        function changeDir(x, z) {
+            if (x !== 0 && direction.x === -x) return;
+            if (z !== 0 && direction.z === -z) return;
+            nextDir = { x: x, z: -z };
+        }
+
+        function update() {
+            direction = nextDir;
+            const head = snake[0].position.clone();
+            head.x += direction.x;
+            head.z += direction.z;
+
+            // Kamera takibi
+            camera.position.x += (head.x - camera.position.x) * 0.1;
+            camera.position.z += (head.z + 15 - camera.position.z) * 0.1;
+            camera.lookAt(head.x, 0, head.z);
+
+            // Ölüm şərtləri (Divar və Ağac)
+            if (Math.abs(head.x) > gridSize/2 || Math.abs(head.z) > gridSize/2) return reset();
+            trees.forEach(t => { if(head.distanceTo(t.position) < 0.8) reset(); });
+
+            // Yemək
+            if (head.distanceTo(food.position) < 0.8) {
+                score += 10;
+                document.getElementById('score').innerText = score;
+                if(score % 50 === 0) { level++; document.getElementById('lvl').innerText = level; }
+                spawnFood();
             } else {
-                if (touchY > centerY && d != "UP") d = "DOWN";
-                else if (touchY < centerY && d != "DOWN") d = "UP";
+                const tail = snake.pop();
+                scene.remove(tail);
             }
-        });
+            createSnakePart(head.x, head.z, true);
 
-        function draw() {
-            ctx.fillStyle = "#0d1117";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            for(let i = 0; i < snake.length; i++) {
-                ctx.fillStyle = (i == 0) ? "#00f2fe" : "#4facfe";
-                ctx.fillRect(snake[i].x, snake[i].y, box, box);
-            }
-
-            ctx.fillStyle = "#ff0055";
-            ctx.fillRect(food.x, food.y, box, box);
-
-            let snakeX = snake[0].x;
-            let snakeY = snake[0].y;
-
-            if( d == "LEFT") snakeX -= box;
-            if( d == "UP") snakeY -= box;
-            if( d == "RIGHT") snakeX += box;
-            if( d == "DOWN") snakeY += box;
-
-            if(snakeX == food.x && snakeY == food.y) {
-                score++;
-                document.getElementById("scoreVal").innerHTML = score;
-                food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
-            } else {
-                snake.pop();
-            }
-
-            let newHead = { x: snakeX, y: snakeY };
-
-            if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
-                clearInterval(game);
-                alert("Oyun Bitdi! Xal: " + score);
-                location.reload();
-            }
-
-            snake.unshift(newHead);
+            // Rəqiblərin hərəkəti (Sadə AI)
+            enemies.forEach(e => {
+                if(Math.random() < 0.2) { // Təsadüfi dönmə
+                    const dirs = [{x:1,z:0},{x:-1,z:0},{x:0,z:1},{x:0,z:-1}];
+                    e.dir = dirs[Math.floor(Math.random()*4)];
+                }
+                const eHead = e.body[0].position.clone();
+                eHead.x += e.dir.x; eHead.z += e.dir.z;
+                
+                // Rəqib divara dəysə sıfırla
+                if(Math.abs(eHead.x) > gridSize/2 || Math.abs(eHead.z) > gridSize/2) {
+                    e.body[0].position.set(0, 0.5, 0);
+                } else {
+                    e.body[0].position.copy(eHead);
+                }
+                
+                // Oyunçu rəqibə dəysə
+                if(head.distanceTo(e.body[0].position) < 0.8) reset();
+            });
         }
 
-        function collision(head, array) {
-            for(let i = 0; i < array.length; i++) {
-                if(head.x == array[i].x && head.y == array[i].y) return true;
-            }
-            return false;
-        }
+        function reset() { alert("Oyun Bitdi! Xal: " + score); location.reload(); }
 
-        let game = setInterval(draw, 120); // Sürət bir az azaldıldı ki, mobil üçün rahat olsun
+        function animate() {
+            requestAnimationFrame(animate);
+            if(food) food.rotation.y += 0.1;
+            renderer.render(scene, camera);
+        }
     </script>
 </body>
 </html>
