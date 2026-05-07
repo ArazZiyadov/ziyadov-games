@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Snake | Ziyadov Games</title>
+    <style>
+        body { 
+            background: #05070a; 
+            color: white; 
+            text-align: center; 
+            font-family: 'Orbitron', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            overflow: hidden;
+        }
+        canvas { 
+            border: 4px solid #00f2fe; 
+            background: #0d1117; 
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.4);
+            max-width: 90vw;
+            max-height: 70vh;
+        }
+        .score-box { 
+            font-size: 24px; 
+            color: #00f2fe; 
+            margin-bottom: 15px; 
+            text-shadow: 0 0 10px #00f2fe;
+        }
+        .controls {
+            margin-top: 20px;
+            color: #484f58;
+            font-size: 14px;
+        }
+        .back-btn { 
+            margin-top: 25px; 
+            color: #8b949e; 
+            text-decoration: none; 
+            font-size: 14px;
+            border: 1px solid #30363d;
+            padding: 8px 20px;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        .back-btn:hover { background: #161b22; color: white; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="score-box">XAL: <span id="scoreVal">0</span></div>
+    <canvas id="snakeGame" width="400" height="400"></canvas>
+    
+    <div class="controls">Klaviatura oxları ilə idarə et</div>
+    
+    <a href="index.html" class="back-btn">← GERİ QAYIT</a>
+
+    <script>
+        const canvas = document.getElementById("snakeGame");
+        const ctx = canvas.getContext("2d");
+        const box = 20;
+        let score = 0;
+
+        let snake = [];
+        snake[0] = { x: 9 * box, y: 10 * box };
+
+        let food = {
+            x: Math.floor(Math.random() * 19 + 1) * box,
+            y: Math.floor(Math.random() * 19 + 1) * box
+        };
+
+        let d;
+        document.addEventListener("keydown", direction);
+
+        function direction(event) {
+            let key = event.keyCode;
+            if(key == 37 && d != "RIGHT") d = "LEFT";
+            else if(key == 38 && d != "DOWN") d = "UP";
+            else if(key == 39 && d != "LEFT") d = "RIGHT";
+            else if(key == 40 && d != "UP") d = "DOWN";
+        }
+
+        function collision(head, array) {
+            for(let i = 0; i < array.length; i++) {
+                if(head.x == array[i].x && head.y == array[i].y) return true;
+            }
+            return false;
+        }
+
+        function draw() {
+            ctx.fillStyle = "#0d1117";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for(let i = 0; i < snake.length; i++) {
+                ctx.fillStyle = (i == 0) ? "#00f2fe" : "#4facfe";
+                ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                ctx.strokeStyle = "#05070a";
+                ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+            }
+
+            ctx.fillStyle = "#ff0055";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#ff0055";
+            ctx.fillRect(food.x, food.y, box, box);
+            ctx.shadowBlur = 0;
+
+            let snakeX = snake[0].x;
+            let snakeY = snake[0].y;
+
+            if( d == "LEFT") snakeX -= box;
+            if( d == "UP") snakeY -= box;
+            if( d == "RIGHT") snakeX += box;
+            if( d == "DOWN") snakeY += box;
+
+            if(snakeX == food.x && snakeY == food.y) {
+                score++;
+                document.getElementById("scoreVal").innerHTML = score;
+                food = {
+                    x: Math.floor(Math.random() * 19 + 1) * box,
+                    y: Math.floor(Math.random() * 19 + 1) * box
+                };
+            } else {
+                snake.pop();
+            }
+
+            let newHead = { x: snakeX, y: snakeY };
+
+            if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+                clearInterval(game);
+                alert("Oyun Bitdi! Xalın: " + score);
+                location.reload();
+            }
+
+            snake.unshift(newHead);
+        }
+
+        let game = setInterval(draw, 100);
+    </script>
+</body>
+</html>
