@@ -3,154 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ziyadov Games Portal</title>
+    <title>Ziyadov Games | Portal</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
-
-        :root {
-            --primary: #00f2fe;
-            --accent: #00ff88;
-            --bg: #050a0f;
-            --card: #0a1219;
-        }
-
-        /* Saytın sağa-sola qaçmasının qarşısını alan əsas nizamlamalar */
+        :root { --p: #00f2fe; --a: #00ff88; --bg: #050a0f; --c: #0a1219; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif; width: 100vw; overflow-x: hidden; }
         
-        body {
-            margin: 0; padding: 0; background: var(--bg); color: white;
-            font-family: 'Rajdhani', sans-serif;
-            width: 100vw; overflow-x: hidden; /* Sağa-sola hərəkəti tam bağlayır */
-        }
+        header { width: 100%; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,242,254,0.1); background: rgba(5,10,15,0.9); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-family: 'Orbitron'; color: var(--p); text-decoration: none; font-weight: 700; }
+        .nav-a { color: var(--a); font-weight: bold; cursor: pointer; text-decoration: none; font-size: 14px; }
 
-        /* Üst Menyu */
-        header {
-            width: 100%; padding: 15px; display: flex; justify-content: space-between; 
-            align-items: center; border-bottom: 1px solid rgba(0, 242, 254, 0.1);
-            background: rgba(5, 10, 15, 0.95); position: sticky; top: 0; z-index: 1000;
-        }
-        .logo { font-family: 'Orbitron', sans-serif; font-size: 18px; color: var(--primary); font-weight: 700; text-decoration: none; }
-        
-        .nav-actions { display: flex; gap: 15px; align-items: center; }
-        .nav-link { color: var(--accent); font-weight: bold; font-size: 14px; text-decoration: none; cursor: pointer; }
+        .search { width: 90%; max-width: 400px; margin: 15px auto; display: flex; background: var(--c); border-radius: 12px; border: 1px solid rgba(0,242,254,0.2); }
+        .search input { width: 100%; background: transparent; border: none; color: white; padding: 12px; font-family: 'Rajdhani'; outline: none; }
 
-        /* Axtarış Bölməsi */
-        .search-bar {
-            width: 90%; max-width: 400px; margin: 20px auto;
-            display: flex; background: var(--card); border-radius: 15px;
-            border: 1px solid rgba(0, 242, 254, 0.2); padding: 5px 15px;
-        }
-        .search-bar input {
-            width: 100%; background: transparent; border: none; color: white;
-            padding: 10px; font-family: 'Rajdhani'; outline: none; font-size: 16px;
-        }
+        .container { padding: 15px; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: var(--c); border-radius: 20px; overflow: hidden; border: 1px solid rgba(0,242,254,0.1); }
+        .banner { width: 100%; height: 160px; object-fit: cover; }
+        .info { padding: 15px; }
+        .title { font-family: 'Orbitron'; font-size: 18px; margin: 0 0 10px 0; }
+        .stats { display: flex; gap: 15px; font-size: 14px; color: var(--a); margin-bottom: 15px; }
+        
+        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: linear-gradient(90deg, var(--p), #4facfe); color: #050a0f; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; }
 
-        /* Oyun Kartları */
-        .main-container { width: 100%; padding: 15px; display: flex; flex-direction: column; gap: 20px; }
-        
-        .game-card {
-            background: var(--card); border-radius: 20px; overflow: hidden;
-            border: 1px solid rgba(0, 242, 254, 0.1); position: relative;
-        }
-        .game-banner { width: 100%; height: 140px; background: #16212a; object-fit: cover; }
-        
-        .card-body { padding: 15px; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .game-title { font-family: 'Orbitron', sans-serif; font-size: 18px; color: white; margin: 0; }
-        
-        .stats { display: flex; gap: 15px; font-size: 14px; color: var(--accent); margin-bottom: 15px; }
-        .stats span.like { color: #00ff88; }
-        
-        .btn-play {
-            width: 100%; padding: 14px; border-radius: 12px; border: none;
-            background: linear-gradient(90deg, #00f2fe, #4facfe);
-            color: #050a0f; font-weight: bold; font-family: 'Orbitron'; cursor: pointer;
-        }
-
-        /* Fullscreen Overlay (Dəstək və Oyun üçün) */
-        #view-layer {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 2000; flex-direction: column;
-        }
-        .view-header {
-            width: 100%; padding: 15px; display: flex; justify-content: space-between;
-            align-items: center; background: #0a1219; border-bottom: 1px solid #333;
-        }
-        #view-frame { flex-grow: 1; border: none; width: 100%; height: 100%; }
-        .close-btn { background: #ff4400; color: white; border: none; padding: 8px 18px; border-radius: 8px; font-family: 'Orbitron'; font-weight: bold; }
-
+        /* Overlay */
+        #layer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; flex-direction: column; }
+        .head { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #0a1219; }
+        iframe { flex-grow: 1; border: none; }
+        .close { background: #ff4400; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-family: 'Orbitron'; }
     </style>
 </head>
 <body>
-
     <header>
         <a href="#" class="logo">ZIYADOV GAMES</a>
-        <div class="nav-actions">
-            <span class="nav-link" onclick="openContent('support.html', 'DƏSTƏK OL')">DƏSTƏK</span>
-            <span class="nav-link" style="color:white" onclick="location.reload()">OYUNLAR</span>
-        </div>
+        <span class="nav-a" onclick="openP('support.html', 'DƏSTƏK')">DƏSTƏK OL</span>
     </header>
 
-    <div class="search-bar">
-        <input type="text" placeholder="Oyunun adını yaz..." onkeyup="searchGame(this.value)">
-    </div>
+    <div class="search"><input type="text" placeholder="Oyun axtar..." onkeyup="searchG(this.value)"></div>
+    <div class="container" id="list"></div>
 
-    <div class="main-container" id="game-list">
-        </div>
-
-    <div id="view-layer">
-        <div class="view-header">
-            <span id="view-name" style="font-family:'Orbitron'; color:var(--primary)">YÜKLƏNİR...</span>
-            <button class="close-btn" onclick="closeView()">BAĞLA</button>
-        </div>
-        <iframe id="view-frame" src=""></iframe>
+    <div id="layer">
+        <div class="head"><span id="v-name" style="color:var(--p); font-family:'Orbitron'"></span><button class="close" onclick="closeP()">BAĞLA</button></div>
+        <iframe id="frame"></iframe>
     </div>
 
     <script>
+        // OYUNLARI BURADAN ƏLAVƏ ET
         const games = [
-            { title: "Snake 3D", likes: "95%", levels: "125 Levels", img: "https://img.freepik.com/free-vector/snake-pixel-art-style_23-2148523555.jpg", file: "snake.html" },
-            { title: "Subway Surfer", likes: "91%", levels: "High Speed", img: "https://img.freepik.com/free-vector/runner-silhouette-concept_23-2148622115.jpg", file: "surfer.html" },
-            { title: "Core Clicker", likes: "98%", levels: "Endless", img: "https://img.freepik.com/free-vector/neon-lightning-bolt_52683-39832.jpg", file: "clicker.html" }
+            { t: "Snake 3D", l: "95%", i: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=500", f: "snake_page.html" },
+            { t: "Subway Surfer", l: "91%", i: "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=500", f: "surfer_page.html" },
+            { t: "Core Clicker", l: "98%", i: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=500", f: "clicker_page.html" }
         ];
 
-        function renderGames(data) {
-            const container = document.getElementById('game-list');
-            container.innerHTML = data.map(g => `
-                <div class="game-card">
-                    <img src="${g.img}" class="game-banner">
-                    <div class="card-body">
-                        <div class="card-header">
-                            <h2 class="game-title">${g.title}</h2>
-                        </div>
-                        <div class="stats">
-                            <span class="like">👍 ${g.likes}</span>
-                            <span style="color:#8b949e">${g.levels}</span>
-                        </div>
-                        <button class="btn-play" onclick="openContent('${g.file}', '${g.title}')">İNDİ OYNA</button>
+        function draw(data) {
+            document.getElementById('list').innerHTML = data.map(g => `
+                <div class="card">
+                    <img src="${g.i}" class="banner">
+                    <div class="info">
+                        <h2 class="title">${g.t}</h2>
+                        <div class="stats"><span>👍 ${g.l}</span><span>Canlı Rəy ✅</span></div>
+                        <button class="btn" onclick="openP('${g.f}', '${g.t}')">GİRİŞ ET</button>
                     </div>
                 </div>
             `).join('');
         }
-
-        function searchGame(val) {
-            const filtered = games.filter(g => g.title.toLowerCase().includes(val.toLowerCase()));
-            renderGames(filtered);
-        }
-
-        function openContent(url, name) {
-            document.getElementById('view-frame').src = url;
-            document.getElementById('view-name').innerText = name;
-            document.getElementById('view-layer').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeView() {
-            document.getElementById('view-layer').style.display = 'none';
-            document.getElementById('view-frame').src = "";
-            document.body.style.overflow = 'auto';
-        }
-
-        window.onload = () => renderGames(games);
+        function searchG(v) { draw(games.filter(g => g.t.toLowerCase().includes(v.toLowerCase()))); }
+        function openP(u, n) { document.getElementById('frame').src = u; document.getElementById('v-name').innerText = n; document.getElementById('layer').style.display = 'flex'; }
+        function closeP() { document.getElementById('layer').style.display = 'none'; document.getElementById('frame').src = ""; }
+        window.onload = () => draw(games);
     </script>
 </body>
 </html>
