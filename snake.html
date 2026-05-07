@@ -3,215 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Infinity Snake 3D Pro | Ziyadov Games</title>
+    <title>Snake Pro | Ziyadov Games</title>
     <style>
-        body { margin: 0; background: #87ceeb; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        #ui { position: absolute; top: 20px; left: 20px; color: white; z-index: 10; pointer-events: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        #fps { position: absolute; top: 20px; right: 20px; color: #00ff00; font-family: monospace; z-index: 10; font-weight: bold; }
+        body { margin: 0; background: #1a2a1a; overflow: hidden; font-family: 'Arial', sans-serif; }
+        #ui { position: absolute; top: 20px; left: 20px; color: white; z-index: 10; pointer-events: none; }
+        #score { font-size: 32px; font-weight: bold; text-shadow: 0 0 10px rgba(0,242,254,0.8); }
         
-        #joy-container {
-            position: absolute; bottom: 50px; left: 50px; width: 140px; height: 140px;
-            background: rgba(255,255,255,0.1); border-radius: 50%; backdrop-filter: blur(8px);
-            border: 2px solid rgba(255,255,255,0.3); touch-action: none;
+        /* Joystick */
+        #joy-zone {
+            position: absolute; bottom: 50px; left: 50px; width: 120px; height: 120px;
+            background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
         }
         #joy-stick {
-            position: absolute; top: 50%; left: 50%; width: 55px; height: 55px;
-            background: radial-gradient(circle, #fff, #00f2fe); border-radius: 50%;
-            transform: translate(-50%, -50%); box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            position: absolute; top: 50%; left: 50%; width: 50px; height: 50px;
+            background: #00f2fe; border-radius: 50%; transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px #00f2fe;
         }
     </style>
 </head>
 <body>
 
-    <div id="ui"><h2 style="margin:0;">XAL: <span id="score">0</span></h2></div>
-    <div id="fps">FPS: 120</div>
-
-    <div id="joy-container"><div id="joy-stick"></div></div>
+    <div id="ui"><div id="score">0</div></div>
+    <div id="joy-zone"><div id="joy-stick"></div></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-        let scene, camera, renderer, player = [], enemies = [], foods = [], environment = [];
-        let score = 0, moveDir = new THREE.Vector3(0.25, 0, 0);
-        let lastTime = 0, frameCount = 0;
-        const RENDER_DIST = 150;
+        let scene, camera, renderer, player = [], foods = [], rivals = [], decoration = [];
+        let score = 0, moveDir = new THREE.Vector3(0.2, 0, 0);
+        const worldLimit = 150; 
 
         init();
         animate();
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87ceeb);
-            scene.fog = new THREE.Fog(0x87ceeb, 10, 150);
+            scene.background = new THREE.Color(0x4facfe); // Parlaq Səma
+            scene.fog = new THREE.Fog(0x4facfe, 20, 100);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             
-            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
 
-            // Light
-            const ambient = new THREE.AmbientLight(0xffffff, 0.9);
-            scene.add(ambient);
+            // İşıqlandırma (Daha parlaq)
+            scene.add(new THREE.AmbientLight(0xffffff, 0.9));
             const sun = new THREE.DirectionalLight(0xffffff, 0.6);
-            sun.position.set(20, 100, 20);
+            sun.position.set(10, 50, 10);
             scene.add(sun);
 
-            // Ground
-            const groundGeo = new THREE.PlaneGeometry(2000, 2000);
-            const groundMat = new THREE.MeshPhongMaterial({ color: 0x4CAF50 });
-            this.ground = new THREE.Mesh(groundGeo, groundMat);
-            this.ground.rotation.x = -Math.PI / 2;
-            scene.add(this.ground);
+            // Zəmin (Otluq Dizaynı)
+            const groundGeo = new THREE.PlaneGeometry(500, 500);
+            const groundMat = new THREE.MeshPhongMaterial({ color: 0x348C31 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            scene.add(ground);
 
-            // Start with 3 spheres (As requested)
+            // 1. Ağaclar və Otlar əlavə edək (Səliqəli sayda)
+            for(let i=0; i<100; i++) spawnDecor();
+
+            // 2. İlanı 3 kürə ilə başladaq
             for(let i=0; i<3; i++) {
-                const seg = createSegment(i === 0 ? 0x00d2ff : 0x00f2fe);
-                seg.position.set(-i * 0.8, 0.7, 0);
-                player.push(seg);
+                addSegment(i === 0);
             }
 
-            // Initial spawns
-            for(let i=0; i<80; i++) spawnDecoration();
-            for(let i=0; i<40; i++) spawnFood();
-            for(let i=0; i<6; i++) spawnEnemyAI();
+            // 3. Yeməklər (Hər zaman xəritədə 20 dənə olsun)
+            for(let i=0; i<20; i++) spawnFood();
+
+            // 4. Rəqiblər
+            for(let i=0; i<3; i++) spawnRival();
 
             setupJoystick();
         }
 
-        function createSegment(color) {
-            const seg = new THREE.Mesh(
-                new THREE.SphereGeometry(0.7, 24, 24),
-                new THREE.MeshPhongMaterial({ color: color, emissive: color, emissiveIntensity: 0.1 })
-            );
-            scene.add(seg);
-            return seg;
+        function spawnDecor() {
+            const x = (Math.random() - 0.5) * 200;
+            const z = (Math.random() - 0.5) * 200;
+            
+            const group = new THREE.Group();
+            // Sadə Ağac
+            const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.5, 0.3), new THREE.MeshPhongMaterial({color: 0x5d3a1a}));
+            const top = new THREE.Mesh(new THREE.ConeGeometry(1.2, 3, 6), new THREE.MeshPhongMaterial({color: 0x1b4d1b}));
+            top.position.y = 2;
+            group.add(trunk); group.add(top);
+            group.position.set(x, 0.75, z);
+            scene.add(group);
+            decoration.push(group);
         }
 
-        function spawnDecoration() {
-            const x = (Math.random() - 0.5) * 400;
-            const z = (Math.random() - 0.5) * 400;
-            
-            const tree = new THREE.Group();
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 1.8), new THREE.MeshPhongMaterial({color: 0x5d3a1a}));
-            const leaf = new THREE.Mesh(new THREE.ConeGeometry(1.2, 3, 8), new THREE.MeshPhongMaterial({color: 0x1b5e20}));
-            leaf.position.y = 1.8;
-            tree.add(trunk); tree.add(leaf);
-            tree.position.set(x, 0.9, z);
-            scene.add(tree);
-            environment.push(tree);
+        function addSegment(isHead = false) {
+            const geo = new THREE.SphereGeometry(0.7, 20, 20);
+            const mat = new THREE.MeshPhongMaterial({ 
+                color: isHead ? 0x00ffff : 0x00d2ff,
+                emissive: isHead ? 0x00ffff : 0x000000,
+                emissiveIntensity: 0.3
+            });
+            const segment = new THREE.Mesh(geo, mat);
+            if(player.length > 0) {
+                const last = player[player.length - 1];
+                segment.position.copy(last.position);
+            } else {
+                segment.position.set(0, 0.7, 0);
+            }
+            scene.add(segment);
+            player.push(segment);
         }
 
         function spawnFood() {
             const food = new THREE.Mesh(
-                new THREE.SphereGeometry(0.4, 16, 16),
-                new THREE.MeshPhongMaterial({ color: 0xffeb3b, emissive: 0xffeb3b, emissiveIntensity: 0.5 })
+                new THREE.SphereGeometry(0.4, 12, 12),
+                new THREE.MeshPhongMaterial({ color: 0xff0055, emissive: 0xff0055 })
             );
-            food.position.set((Math.random()-0.5)*300, 0.5, (Math.random()-0.5)*300);
+            food.position.set((Math.random()-0.5)*180, 0.5, (Math.random()-0.5)*180);
             scene.add(food);
             foods.push(food);
         }
 
-        function spawnEnemyAI() {
-            const body = [];
-            const startPos = new THREE.Vector3((Math.random()-0.5)*200, 0.7, (Math.random()-0.5)*200);
-            const color = new THREE.Color().setHSL(Math.random(), 0.8, 0.5);
-            for(let i=0; i<15; i++) {
-                const seg = new THREE.Mesh(new THREE.SphereGeometry(0.9, 16, 16), new THREE.MeshPhongMaterial({color: color}));
-                seg.position.copy(startPos);
-                scene.add(seg);
-                body.push(seg);
-            }
-            enemies.push({ body, dir: new THREE.Vector3(0.12, 0, 0.12) });
+        function spawnRival() {
+            const rivalGeo = new THREE.SphereGeometry(0.8, 12, 12);
+            const rivalMat = new THREE.MeshPhongMaterial({ color: 0xffaa00 });
+            const rival = new THREE.Mesh(rivalGeo, rivalMat);
+            rival.position.set((Math.random()-0.5)*100, 0.8, (Math.random()-0.5)*100);
+            scene.add(rival);
+            rivals.push({ mesh: rival, dir: new THREE.Vector3(0.1, 0, 0.1) });
         }
 
         function setupJoystick() {
-            const container = document.getElementById('joy-container');
+            const zone = document.getElementById('joy-zone');
             const stick = document.getElementById('joy-stick');
             let active = false;
 
             const move = (e) => {
                 if(!active) return;
-                const touch = e.touches ? e.touches[0] : e;
-                const rect = container.getBoundingClientRect();
-                const center = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
-                const dx = touch.clientX - center.x;
-                const dy = touch.clientY - center.y;
+                const t = e.touches ? e.touches[0] : e;
+                const r = zone.getBoundingClientRect();
+                const dx = t.clientX - (r.left + 60);
+                const dy = t.clientY - (r.top + 60);
                 const angle = Math.atan2(dy, dx);
-                const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 55);
+                const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
 
                 stick.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
                 
-                // Joystick Sensitivity
-                moveDir.x = Math.cos(angle) * 0.28;
-                moveDir.z = Math.sin(angle) * 0.28;
+                // İlanın dönmə sürəti və həssaslığı
+                moveDir.x = Math.cos(angle) * 0.25;
+                moveDir.z = Math.sin(angle) * 0.25;
             };
 
-            container.addEventListener('touchstart', () => active = true);
+            zone.addEventListener('touchstart', () => active = true);
             window.addEventListener('touchend', () => { active = false; stick.style.transform = 'translate(-50%, -50%)'; });
             window.addEventListener('touchmove', move);
         }
 
-        function animate(time) {
+        function animate() {
             requestAnimationFrame(animate);
-            
-            // FPS Meter
-            frameCount++;
-            if (time - lastTime >= 1000) {
-                document.getElementById('fps').innerText = "FPS: " + frameCount;
-                frameCount = 0; lastTime = time;
-            }
 
-            // Player Physics
-            const head = player[0];
+            // İlan Bədən Hərəkəti
             for(let i = player.length - 1; i > 0; i--) {
-                player[i].position.lerp(player[i-1].position, 0.35);
+                player[i].position.lerp(player[i-1].position, 0.3);
             }
-            head.position.add(moveDir);
+            player[0].position.add(moveDir);
 
-            // Ground Follow (Infinite Illusion)
-            this.ground.position.set(head.position.x, 0, head.position.z);
+            // Kamera
+            camera.position.lerp(new THREE.Vector3(player[0].position.x, 12, player[0].position.z + 18), 0.1);
+            camera.lookAt(player[0].position);
 
-            // Camera Smoothing
-            const camOffset = new THREE.Vector3(head.position.x, 18, head.position.z + 25);
-            camera.position.lerp(camOffset, 0.1);
-            camera.lookAt(head.position);
-
-            // Food Collection
-            foods.forEach((f, idx) => {
-                if(head.position.distanceTo(f.position) < 1.8) {
+            // Yemək Yemə (Toqquşma)
+            foods.forEach((f, i) => {
+                if(player[0].position.distanceTo(f.position) < 1.5) {
                     scene.remove(f);
-                    foods.splice(idx, 1);
-                    score += 5;
+                    foods.splice(i, 1);
+                    score += 10;
                     document.getElementById('score').innerText = score;
-                    spawnFood();
-                    grow();
+                    addSegment();
+                    spawnFood(); // Yemək yeyilən kimi yenisi çıxır
                 }
             });
 
-            // Enemy AI Logic
-            enemies.forEach(en => {
-                for(let i = en.body.length-1; i>0; i--) en.body[i].position.lerp(en.body[i-1].position, 0.15);
-                en.body[0].position.add(en.dir);
-                if(Math.random() < 0.03) en.dir.applyAxisAngle(new THREE.Vector3(0,1,0), (Math.random()-0.5) * 0.5);
-                
-                // Dead on collision with enemy
-                if(head.position.distanceTo(en.body[0].position) < 2.5) location.reload();
+            // Ağaclarla toqquşma
+            decoration.forEach(d => {
+                if(player[0].position.distanceTo(d.position) < 1.5) location.reload();
             });
 
-            // Nature Collision (Safe boundaries)
-            environment.forEach(obj => {
-                if(head.position.distanceTo(obj.position) < 1.8) location.reload();
+            // Rəqiblərin Sadə Hərəkəti
+            rivals.forEach(r => {
+                r.mesh.position.add(r.dir);
+                if(Math.abs(r.mesh.position.x) > 100) r.dir.x *= -1;
+                if(player[0].position.distanceTo(r.mesh.position) < 2) location.reload();
             });
+
+            // Dünyanın sonu
+            if(Math.abs(player[0].position.x) > 250 || Math.abs(player[0].position.z) > 250) location.reload();
 
             renderer.render(scene, camera);
-        }
-
-        function grow() {
-            const seg = createSegment(0x00f2fe);
-            seg.position.copy(player[player.length-1].position);
-            player.push(seg);
         }
     </script>
 </body>
