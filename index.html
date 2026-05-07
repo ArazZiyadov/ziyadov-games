@@ -3,158 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ziyadov Games Portal</title>
+    <title>Ziyadov Games | Portal</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
 
+        :root {
+            --primary: #00f2fe;
+            --accent: #00ff88;
+            --bg: #050a0f;
+            --card-bg: #0a1219;
+        }
+
         body {
-            margin: 0; padding: 0; background-color: #050a0f; color: white;
-            font-family: 'Rajdhani', sans-serif; display: flex; flex-direction: column; align-items: center;
+            margin: 0; padding: 0; background: var(--bg); color: white;
+            font-family: 'Rajdhani', sans-serif; overflow-x: hidden;
         }
 
-        /* Naviqasiya */
+        /* HEADER */
         header {
-            width: 100%; padding: 20px 0; display: flex; justify-content: space-around; align-items: center;
-            border-bottom: 1px solid rgba(0, 242, 254, 0.1); position: sticky; top: 0; background: #050a0f; z-index: 100;
+            width: 100%; padding: 20px 0; display: flex; justify-content: space-around; 
+            align-items: center; border-bottom: 1px solid rgba(0, 242, 254, 0.1);
+            position: sticky; top: 0; background: rgba(5, 10, 15, 0.9); backdrop-filter: blur(10px); z-index: 1000;
         }
-        .logo { font-family: 'Orbitron', sans-serif; font-weight: 700; color: #00f2fe; letter-spacing: 2px; text-decoration: none; }
-        .nav-links a { color: white; text-decoration: none; margin: 0 10px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .nav-links .support-btn { color: #00ff88; text-shadow: 0 0 5px #00ff88; }
+        .logo { font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--primary); letter-spacing: 2px; cursor: pointer; }
+        .nav-links a { color: white; text-decoration: none; margin: 0 10px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
 
-        /* Başlıq sahəsi */
-        .hero { text-align: center; margin-top: 30px; }
-        .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 26px; letter-spacing: 4px; margin: 0; color: #fff; }
-        .hero p { color: #8b949e; font-size: 12px; margin-top: 5px; letter-spacing: 1px; }
-
-        .divider { width: 90%; display: flex; align-items: center; margin: 25px 0; }
-        .divider-text { color: #00f2fe; padding: 0 15px; font-size: 15px; font-family: 'Orbitron'; white-space: nowrap; }
-        .line { flex-grow: 1; height: 1px; background: rgba(0, 242, 254, 0.2); }
-
-        /* Oyun Kartları - Şəkillərlə */
-        .game-container { width: 95%; max-width: 400px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 50px; }
-        
-        .card {
-            background: #0a1219; border: 1px solid rgba(0, 242, 254, 0.1);
-            border-radius: 25px; overflow: hidden; text-align: center; transition: 0.3s;
-        }
-        .card:hover { border-color: #00f2fe; transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0, 242, 254, 0.2); }
-        
-        .game-img { width: 100%; height: 160px; object-fit: cover; border-bottom: 2px solid rgba(0, 242, 254, 0.1); }
-        
-        .card-content { padding: 20px; }
-        .card h2 { font-family: 'Orbitron', sans-serif; margin: 10px 0; font-size: 20px; color: #fff; }
-        .card p { color: #8b949e; font-size: 14px; margin-bottom: 20px; line-height: 1.4; }
-
-        .btn-play {
-            width: 90%; background: linear-gradient(90deg, #00f2fe, #4facfe);
-            border: none; padding: 14px; border-radius: 15px; color: #050a0f;
-            font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; font-size: 15px;
+        /* AXTARIŞ QİSİMİ */
+        .search-container { width: 90%; max-width: 400px; margin: 20px auto; position: relative; }
+        .search-input {
+            width: 100%; padding: 12px 20px; border-radius: 20px; border: 1px solid rgba(0,242,254,0.3);
+            background: var(--card-bg); color: white; font-family: 'Rajdhani'; outline: none;
         }
 
-        /* Dəstək Ol Ekranı */
+        /* OYUNLAR SİYAHISI */
+        .container { width: 95%; max-width: 450px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; box-sizing: border-box; }
+        .game-card {
+            background: var(--card-bg); border-radius: 20px; overflow: hidden;
+            border: 1px solid rgba(0,242,254,0.1); transition: 0.3s; cursor: pointer;
+        }
+        .game-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,242,254,0.2); }
+        .game-thumb { width: 100%; height: 110px; object-fit: cover; }
+        .game-info { padding: 10px; text-align: center; }
+        .game-info h3 { margin: 0; font-size: 14px; font-family: 'Orbitron'; color: #fff; }
+
+        /* FULLSCREEN OVERLAY (Ayrı səyfə kimi açılanlar) */
         .overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #050a0f; z-index: 2000; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; box-sizing: border-box;
+            background: var(--bg); z-index: 9999; flex-direction: column; align-items: center;
         }
-        .support-box {
-            border: 2px solid #00ff88; background: #0a1914; border-radius: 25px;
-            padding: 25px; width: 100%; max-width: 380px; text-align: center;
+        .overlay-header {
+            width: 100%; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;
         }
-        .support-box h2 { color: #00ff88; font-family: 'Orbitron'; font-size: 22px; margin-bottom: 15px; }
-        .support-box p { font-size: 15px; color: #ccd6f6; text-align: left; line-height: 1.6; }
-        .highlight { color: #00f2fe; font-weight: bold; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .close-btn { background: #ff4400; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-family: 'Orbitron'; cursor: pointer; }
 
-        /* Klik Oyunu Dizaynı */
-        .click-ball {
-            width: 180px; height: 180px; background: radial-gradient(circle, #00f2fe, #005f73);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 60px; cursor: pointer; box-shadow: 0 0 40px #00f2fe; user-select: none;
-        }
+        /* THEME SEÇİMİ */
+        .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; }
+        .theme-btn { width: 100px; height: 100px; border-radius: 20px; border: 2px solid #fff; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">ZIYADOV GAMES</div>
+        <div class="logo" onclick="location.reload()">ZIYADOV</div>
         <div class="nav-links">
-            <a onclick="showView('portal')">OYUNLAR</a>
-            <a onclick="showView('support')" class="support-btn">DƏSTƏK OL</a>
+            <a onclick="showSection('themes')">THEMELƏR</a>
+            <a onclick="showSection('support')" style="color: var(--accent);">DƏSTƏK</a>
         </div>
     </header>
 
-    <div id="portal" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-        <div class="hero">
-            <h1>ZIYADOV GAMES</h1>
-            <p>Azərbaycanın mini oyun portalı</p>
-        </div>
-
-        <div class="divider">
-            <div class="line"></div>
-            <div class="divider-text">OYUNLAR SİYAHISI</div>
-            <div class="line"></div>
-        </div>
-
-        <div class="game-container">
-            <div class="card">
-                <img src="https://img.freepik.com/free-vector/neon-lightning-bolt_52683-39832.jpg" class="game-img" alt="Clicker">
-                <div class="card-content">
-                    <h2>Core Clicker</h2>
-                    <p>Klikləmə sürətini sına və rekord qır!</p>
-                    <button class="btn-play" onclick="showView('clicker')">İNDİ OYNA</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <img src="https://img.freepik.com/free-vector/snake-pixel-art-style_23-2148523555.jpg" class="game-img" alt="Snake">
-                <div class="card-content">
-                    <h2>Neon Snake</h2>
-                    <p>Klassik ilan oyunu modern 3D dizaynda.</p>
-                    <button class="btn-play" onclick="location.href='snake.html'">İNDİ OYNA</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <img src="https://img.freepik.com/free-vector/runner-silhouette-concept_23-2148622115.jpg" class="game-img" alt="Surfer">
-                <div class="card-content">
-                    <h2>Subway Surfer</h2>
-                    <p>Maneələrdən qaç, tullan və qızılları topla!</p>
-                    <button class="btn-play" onclick="location.href='surfer.html'">İNDİ OYNA</button>
-                </div>
-            </div>
-        </div>
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Oyun axtar..." onkeyup="filterGames(this.value)">
     </div>
 
-    <div id="support" class="overlay">
-        <div class="support-box">
-            <div style="font-size: 40px; margin-bottom: 10px;">🚀</div>
-            <h2>DƏSTƏK OL</h2>
-            <p>Salam! Mən <span class="highlight">Ziyadov</span>. Mən gənc bir gəlişdiriciyəm (developer) və bu layihəni tamamilə tək başıma idarə edirəm. Məqsədim sizlər üçün ən keyfiyyətli və maraqlı mini-oyun portalını yaratmaqdır.</p>
-            <p>Sizin dəstəyiniz sayəsində yeni oyunlar əlavə edə, sistemi daha da təkmilləşdirə bilərəm. Dəstək olmaq üçün mənə yaza bilərsiniz!</p>
-            <button class="btn-play" style="background:#00ff88; color:#050a0f;" onclick="window.open('https://wa.me/994515114568', '_blank')">WHATSAPP İLƏ YAZ</button>
+    <div id="game-list" class="container">
         </div>
-        <button onclick="showView('portal')" style="margin-top:25px; background:none; border:1px solid #fff; color:#fff; padding:10px 25px; border-radius:10px; cursor:pointer;">GERİ QAYIT</button>
-    </div>
 
-    <div id="clicker" class="overlay">
-        <h1 id="score" style="font-size: 80px; color: #00f2fe; font-family: 'Orbitron'; margin-bottom: 20px;">0</h1>
-        <div class="click-ball" onclick="tap()">⚡</div>
-        <button onclick="showView('portal')" style="margin-top:50px; background:#ff4400; border:none; color:#fff; padding:12px 40px; border-radius:15px; font-weight:bold; cursor:pointer;">OYUNU BAĞLA</button>
+    <div id="view-layer" class="overlay">
+        <div class="overlay-header">
+            <h2 id="view-title" style="font-family:'Orbitron'; font-size:16px;">YÜKLƏNİR...</h2>
+            <button class="close-btn" onclick="closeView()">BAĞLA</button>
+        </div>
+        <iframe id="view-frame" src=""></iframe>
     </div>
 
     <script>
-        function showView(viewId) {
-            document.getElementById('portal').style.display = 'none';
-            document.getElementById('support').style.display = 'none';
-            document.getElementById('clicker').style.display = 'none';
-            document.getElementById(viewId).style.display = 'flex';
+        // --- BU HİSSƏYƏ OYUNLARI TOXUNMADAN ƏLAVƏ ET ---
+        const oyunData = [
+            { id: 1, ad: "Core Clicker", sekil: "https://img.freepik.com/free-vector/neon-lightning-bolt_52683-39832.jpg", fayl: "clicker.html" },
+            { id: 2, ad: "Neon Snake", sekil: "https://img.freepik.com/free-vector/snake-pixel-art-style_23-2148523555.jpg", fayl: "snake.html" },
+            { id: 3, ad: "Subway Surfer", sekil: "https://img.freepik.com/free-vector/runner-silhouette-concept_23-2148622115.jpg", fayl: "surfer.html" }
+        ];
+
+        // Oyunları Ekrana Çıxar
+        function initGames(list) {
+            const container = document.getElementById('game-list');
+            container.innerHTML = "";
+            list.forEach(game => {
+                container.innerHTML += `
+                    <div class="game-card" onclick="openContent('${game.fayl}', '${game.ad}')">
+                        <img src="${game.sekil}" class="game-thumb">
+                        <div class="game-info"><h3>${game.ad}</h3></div>
+                    </div>
+                `;
+            });
         }
 
-        let count = 0;
-        function tap() {
-            count++;
-            document.getElementById('score').innerText = count;
+        // Axtarış Funksiyası
+        function filterGames(val) {
+            const filtered = oyunData.filter(g => g.ad.toLowerCase().includes(val.toLowerCase()));
+            initGames(filtered);
         }
+
+        // Pəncərə Açma
+        function openContent(url, title) {
+            document.getElementById('view-frame').src = url;
+            document.getElementById('view-title').innerText = title;
+            document.getElementById('view-layer').style.display = 'flex';
+        }
+
+        function closeView() {
+            document.getElementById('view-layer').style.display = 'none';
+            document.getElementById('view-frame').src = "";
+        }
+
+        // Digər Bölmələr
+        function showSection(type) {
+            if(type === 'support') openContent('support.html', 'DƏSTƏK OL');
+            if(type === 'themes') openContent('themes.html', 'THEME SEÇİMİ');
+        }
+
+        window.onload = () => initGames(oyunData);
     </script>
 </body>
 </html>
