@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Core 3D Clicker | Ziyadov Games</title>
+    <title>Pro Clicker | Ziyadov Games</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -26,9 +26,21 @@
             touch-action: manipulation;
         }
 
+        /* Arxa fon işığı */
+        .glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--neon);
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        /* Statistika */
         .stats {
             position: absolute;
-            top: 40px;
+            top: 50px;
             text-align: center;
         }
 
@@ -36,102 +48,105 @@
             font-size: 80px;
             font-weight: 900;
             margin: 0;
-            text-shadow: 0 0 20px var(--neon);
+            background: linear-gradient(to bottom, #fff, var(--neon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0, 242, 254, 0.3);
         }
 
         .level-info {
             color: var(--secondary);
-            font-size: 18px;
-            letter-spacing: 2px;
-        }
-
-        /* 3D Core Element */
-        .core-container {
-            position: relative;
-            width: 250px;
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            perspective: 1000px;
-        }
-
-        .core {
-            width: 180px;
-            height: 180px;
-            background: linear-gradient(135deg, var(--neon), var(--secondary));
-            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-            box-shadow: 0 0 50px rgba(0, 242, 254, 0.5), inset 0 0 30px rgba(255,255,255,0.5);
-            animation: morph 8s linear infinite, rotate 15s linear infinite;
-            cursor: pointer;
-            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 4px solid white;
-        }
-
-        .core:active {
-            transform: scale(0.85) rotate(10deg);
-        }
-
-        @keyframes morph {
-            0% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
-            25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
-            50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
-            75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
-            100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .high-score {
-            position: absolute;
-            bottom: 120px;
             font-size: 14px;
-            color: #484f58;
-        }
-
-        /* Təbrik Mesajı */
-        #message {
-            position: absolute;
-            top: 20%;
-            font-size: 24px;
-            color: #ff0055;
-            font-weight: bold;
-            opacity: 0;
-            transition: 0.5s;
+            letter-spacing: 3px;
             text-transform: uppercase;
         }
 
-        .back-btn {
+        /* Clicker Şəkli və Animasiya */
+        .click-area {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        #game-obj {
+            width: 240px;
+            height: 240px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 30px var(--neon));
+            transition: transform 0.05s cubic-bezier(0.1, 0, 0.1, 1);
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* Klikləyəndə 3D basılma effekti */
+        .click-area:active #game-obj {
+            transform: scale(0.9) rotate(-3deg);
+        }
+
+        /* Rekord hissəsi */
+        .high-score {
             position: absolute;
-            bottom: 40px;
+            bottom: 130px;
+            font-size: 14px;
+            color: #484f58;
+            border-top: 1px solid #161b22;
+            padding-top: 10px;
+            width: 200px;
+            text-align: center;
+        }
+
+        /* Təbrik Mesajı */
+        #msg {
+            position: absolute;
+            top: 25%;
+            font-size: 20px;
+            color: #ff0055;
+            text-shadow: 0 0 15px #ff0055;
+            font-weight: 900;
+            opacity: 0;
+            transition: 0.4s;
+            pointer-events: none;
+        }
+
+        .back-link {
+            position: absolute;
+            bottom: 50px;
             color: #8b949e;
             text-decoration: none;
-            border: 1px solid #30363d;
-            padding: 10px 25px;
-            border-radius: 12px;
             font-size: 12px;
+            border: 1px solid #30363d;
+            padding: 10px 30px;
+            border-radius: 50px;
+            transition: 0.3s;
+        }
+
+        .back-link:hover {
+            background: #161b22;
+            color: white;
         }
     </style>
 </head>
 <body>
 
-    <div id="message">MÖHTƏŞƏM! +1 LEVEL</div>
+    <div class="glow"></div>
+    <div id="msg">MÖHTƏŞƏM! +1 LEVEL</div>
 
     <div class="stats">
-        <p class="level-info">LEVEL <span id="level">1</span></p>
+        <p class="level-info">MƏRHƏLƏ <span id="level">1</span></p>
         <h1 id="score">0</h1>
     </div>
 
-    <div class="core-container">
-        <div class="core" onclick="handleTouch()"></div>
+    <div class="click-area" onclick="clickAction()">
+        <img id="game-obj" src="https://cdn-icons-png.flaticon.com/512/3305/3305432.png" alt="Clicker">
     </div>
 
-    <div class="high-score">REKORD: <span id="best">0</span></div>
+    <div class="high-score">ƏN YÜKSƏK: <span id="best">0</span></div>
 
-    <a href="index.html" class="back-btn">← PORTALA QAYIT</a>
+    <a href="index.html" class="back-link">← GERİ QAYIT</a>
 
     <script>
         let score = 0;
@@ -139,58 +154,68 @@
         let best = localStorage.getItem('ziyadovBest') || 0;
         document.getElementById('best').innerText = best;
 
-        // Səs funksiyaları (Sintezator istifadə edirik ki, əlavə fayla ehtiyac olmasın)
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Audio sistemi
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
 
-        function playClickSound() {
+        function playTik() {
+            initAudio();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+            osc.stop(audioCtx.currentTime + 0.05);
         }
 
-        function playLevelSound() {
-            const msg = new SpeechSynthesisUtterance();
-            msg.text = "Təbriklər! Yeni mərhələ açıldı";
-            msg.lang = "tr-TR"; // Azərbaycan dilinə ən yaxın səs
-            window.speechSynthesis.speak(msg);
+        function playAnnounce() {
+            const speech = new SpeechSynthesisUtterance();
+            speech.text = "Təbriklər, yeni mərhələ";
+            speech.lang = "tr-TR"; 
+            window.speechSynthesis.speak(speech);
         }
 
-        function handleTouch() {
+        function clickAction() {
+            initAudio();
             score++;
             document.getElementById('score').innerText = score;
-            playClickSound();
+            playTik();
 
-            // Rekord yeniləmə
+            // Rekord yoxla
             if(score > best) {
                 best = score;
                 localStorage.setItem('ziyadovBest', best);
                 document.getElementById('best').innerText = best;
             }
 
-            // Level keçidi (hər 20 xalda bir)
+            // Hər 20 klikdə Level artır
             if(score % 20 === 0) {
                 level++;
                 document.getElementById('level').innerText = level;
-                showLevelMessage();
-                playLevelSound();
+                showMsg();
+                playAnnounce();
             }
         }
 
-        function showLevelMessage() {
-            const msgDiv = document.getElementById('message');
-            msgDiv.style.opacity = "1";
-            msgDiv.style.transform = "translateY(-20px)";
+        function showMsg() {
+            const m = document.getElementById('msg');
+            m.style.opacity = "1";
+            m.style.transform = "translateY(-20px)";
             setTimeout(() => {
-                msgDiv.style.opacity = "0";
-                msgDiv.style.transform = "translateY(0)";
-            }, 2000);
+                m.style.opacity = "0";
+                m.style.transform = "translateY(0)";
+            }, 1500);
         }
     </script>
 </body>
